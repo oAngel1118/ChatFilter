@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "ChatFilter",
+    "name": "Chat Filter",
+    "description": "Chat Filter Mod",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/oAngel1118/ChatFilter",
+    "updateUrl": "",
+    "authorList": ["NanFuGod"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
