@@ -62,7 +62,8 @@ public class ChatFilter
                     event.setCanceled(true);
                     if (ChatFilterCommand.ENABLE_CHAT_INV) {
                         ChatStyle style = new ChatStyle();
-                        style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, event.message));
+                        style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ChatComponentText(wrapText(event.message.getUnformattedText(), 32))));
                         ChatComponentText iChatComponents = new ChatComponentText(ChatFilterCommand.CUSTOM_MESSAGE);
                         iChatComponents.setChatStyle(style);
                         mc.thePlayer.addChatMessage(iChatComponents);
@@ -83,7 +84,8 @@ public class ChatFilter
                     event.setCanceled(true);
                     if (ChatFilterCommand.ENABLE_CHAT_INV) {
                         ChatStyle style = new ChatStyle();
-                        style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, event.message));
+                        style.setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ChatComponentText(wrapText(event.message.getUnformattedText(), 32))));
                         ChatComponentText iChatComponents = new ChatComponentText(ChatFilterCommand.CUSTOM_MESSAGE);
                         iChatComponents.setChatStyle(style);
                         mc.thePlayer.addChatMessage(iChatComponents);
@@ -139,5 +141,26 @@ public class ChatFilter
         }
 
         return String.valueOf(baseChar);
+    }
+
+    private String wrapText(String text, int maxLen) {
+        if (text == null || text.length() <= maxLen) {
+            return text;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            sb.append(text.charAt(i));
+            count++;
+
+            if (count >= maxLen && i < text.length() - 1) {
+                sb.append('\n');
+                count = 0;
+            }
+        }
+
+        return sb.toString();
     }
 }

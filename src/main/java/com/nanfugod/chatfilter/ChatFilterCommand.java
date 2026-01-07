@@ -390,8 +390,7 @@ public class ChatFilterCommand extends CommandBase {
                 continue;
             }
 
-            NetworkPlayerInfo info =
-                    mc.getNetHandler().getPlayerInfo(player.getUniqueID());
+            NetworkPlayerInfo info = mc.getNetHandler().getPlayerInfo(player.getUniqueID());
 
             if (info == null) {
                 continue;
