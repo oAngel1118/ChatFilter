@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Mod(modid = ChatFilter.MODID, version = ChatFilter.VERSION)
@@ -65,13 +66,15 @@ public class ChatFilter
                         ChatComponentText iChatComponents = new ChatComponentText(ChatFilterCommand.CUSTOM_MESSAGE);
                         iChatComponents.setChatStyle(style);
                         mc.thePlayer.addChatMessage(iChatComponents);
+                        return;
                     } else {
                         log("屏蔽消息：" + rawMessage + "屏蔽词：" + playerName);
+                        return;
                     }
                 }
             }
 
-            String content = rawMessage.replaceAll(split[0], "");
+            String content = rawMessage.replaceAll(Pattern.quote(split[0]), "");
             content = compressSingleRepeatedChar(filterNonAlphanumericChinese(content.toLowerCase()));
             IGNORE_WORDS.addAll(ChatFilterCommand.TEMP_IGNORE_WORDS);
             IGNORE_WORDS.addAll(ConfigUtil.ignoreWords);
@@ -84,9 +87,10 @@ public class ChatFilter
                         ChatComponentText iChatComponents = new ChatComponentText(ChatFilterCommand.CUSTOM_MESSAGE);
                         iChatComponents.setChatStyle(style);
                         mc.thePlayer.addChatMessage(iChatComponents);
-                        break;
+                        return;
                     }else {
                         log("屏蔽消息：" + rawMessage + "屏蔽词：" + tempIgnoreWord);
+                        return;
                     }
                 }
             }

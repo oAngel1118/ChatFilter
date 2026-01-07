@@ -1,8 +1,12 @@
 package com.nanfugod.chatfilter;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -335,20 +339,49 @@ public class ChatFilterCommand extends CommandBase {
     // ====================== Tab补全（适配-list指令） ======================
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+        // =========================
+        // /ignore <TAB>
+        // =========================
         if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, "-toggle", "-add", "-remove", "-list", "-config", "-reload", "-customMsg");
+            return getListOfStringsMatchingLastWord(
+                    args
+            );
         }
 
+        // =========================
+        // /ignore add <TAB>
+        // =========================
+        if (args.length == 2 && args[0].equalsIgnoreCase("-add")) {
+            return getListOfStringsMatchingLastWord(
+                    args
+            );
+        }
+
+        // =========================
+        // /ignore remove <TAB>
+        // =========================
         if (args.length == 2 && args[0].equalsIgnoreCase("-remove")) {
-            return getListOfStringsMatchingLastWord(args, getCompletableIgnoreItems());
+            return getListOfStringsMatchingLastWord(
+                    args,
+                    getCompletableIgnoreItems()
+            );
         }
 
+        // =========================
+        // /ignore config <TAB>
+        // =========================
         if (args.length == 2 && args[0].equalsIgnoreCase("-config")) {
             return getListOfStringsMatchingLastWord(args, "0", "1");
         }
 
-        if (args.length >= 2 && (args[0].equalsIgnoreCase("-toggle") || args[0].equalsIgnoreCase("-list"))) {
-            return Collections.emptyList();
+        // =========================
+        // /ignore 子命令补全
+        // =========================
+        if (args.length == 1) {
+            return getListOfStringsMatchingLastWord(
+                    args,
+                    "-toggle", "-add", "-remove", "-list", "-config", "-reload"
+            );
         }
 
         return Collections.emptyList();
@@ -358,4 +391,5 @@ public class ChatFilterCommand extends CommandBase {
     public int getRequiredPermissionLevel() {
         return 0;
     }
+
 }
