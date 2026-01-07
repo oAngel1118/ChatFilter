@@ -1,15 +1,15 @@
 package com.nanfugod.chatfilter;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -339,49 +339,26 @@ public class ChatFilterCommand extends CommandBase {
     // ====================== Tab补全（适配-list指令） ======================
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-        // =========================
-        // /ignore <TAB>
-        // =========================
         if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(
-                    args
-            );
+            List<String> tabCompletions = new ArrayList<>();
+            tabCompletions.addAll(getListOfStringsMatchingLastWord(args, "-toggle", "-add", "-remove", "-list", "-config", "-reload", "-customMsg"));
+            tabCompletions.addAll(getOnlinePlayerNames(true));
+            return getListOfStringsMatchingLastWord(args, tabCompletions);
         }
-
-        // =========================
-        // /ignore add <TAB>
-        // =========================
         if (args.length == 2 && args[0].equalsIgnoreCase("-add")) {
-            return getListOfStringsMatchingLastWord(
-                    args
-            );
+            return getListOfStringsMatchingLastWord(args, getOnlinePlayerNames(true));
         }
 
-        // =========================
-        // /ignore remove <TAB>
-        // =========================
         if (args.length == 2 && args[0].equalsIgnoreCase("-remove")) {
-            return getListOfStringsMatchingLastWord(
-                    args,
-                    getCompletableIgnoreItems()
-            );
+            return getListOfStringsMatchingLastWord(args, getCompletableIgnoreItems());
         }
 
-        // =========================
-        // /ignore config <TAB>
-        // =========================
         if (args.length == 2 && args[0].equalsIgnoreCase("-config")) {
             return getListOfStringsMatchingLastWord(args, "0", "1");
         }
 
-        // =========================
-        // /ignore 子命令补全
-        // =========================
-        if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(
-                    args,
-                    "-toggle", "-add", "-remove", "-list", "-config", "-reload"
-            );
+        if (args.length >= 2 && (args[0].equalsIgnoreCase("-toggle") || args[0].equalsIgnoreCase("-list"))) {
+            return Collections.emptyList();
         }
 
         return Collections.emptyList();
@@ -391,5 +368,71 @@ public class ChatFilterCommand extends CommandBase {
     public int getRequiredPermissionLevel() {
         return 0;
     }
+
+
+
+    private List<String> getOnlinePlayerNames(boolean excludeIgnored) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.theWorld == null || mc.getNetHandler() == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<>();
+
+        for (EntityPlayer player : mc.theWorld.playerEntities) {
+            if (!(player instanceof EntityOtherPlayerMP)) {
+                continue;
+            }
+
+            String name = player.getName();
+
+            if (isNpcName(name)) {
+                continue;
+            }
+
+            NetworkPlayerInfo info =
+                    mc.getNetHandler().getPlayerInfo(player.getUniqueID());
+
+            if (info == null) {
+                continue;
+            }
+            if (mc.thePlayer != null &&
+                    name.equalsIgnoreCase(mc.thePlayer.getName())) {
+                continue;
+            }
+
+            if (excludeIgnored) {
+                if (ChatFilterCommand.TEMP_IGNORE_PLAYERS.contains(name)) continue;
+                if (ConfigUtil.ignorePlayers.stream()
+                        .anyMatch(p -> p.equalsIgnoreCase(name))) continue;
+            }
+
+            result.add(name);
+        }
+
+        return result;
+    }
+
+    private boolean isNpcName(String name) {
+        if (name == null) return false;
+
+        // 1. 长度必须是 10
+        if (name.length() != 10) {
+            return false;
+        }
+
+        // 2. 只能是小写字母和数字
+        if (!name.matches("^[a-z0-9]+$")) {
+            return false;
+        }
+
+        if (name.matches("^[a-z]+$")) {
+            return false;
+        }
+
+        return !name.matches("^[0-9]+$");
+
+    }
+
 
 }
